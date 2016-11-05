@@ -29,14 +29,10 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, String> //Thre
 
     public ProcMon.ExitCode doInBackground()
     {
-        if(isCancelled() || Thread.interrupted())
+        ProcMon.ExitCode exit = checkCancel();
+        if(!(exit == ProcMon.ExitCode.RUNNING || exit == ProcMon.ExitCode.NULL))
         {
-            if(procMon != null)
-            {
-                procMon.destroy();
-                return ProcMon.ExitCode.ERROR;
-            }
-            return ProcMon.ExitCode.NULL;
+            return exit;
         }
         if(procMon == null)
         {
@@ -61,6 +57,11 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, String> //Thre
         }
         while(!procMon.isComplete())
         {
+            exit = checkCancel();
+            if(exit != ProcMon.ExitCode.RUNNING)
+            {
+                return exit;
+            }
             try
             {
                 int i = 0;
@@ -137,28 +138,47 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, String> //Thre
         }
         statusLabel.setText(contents);
     }
-    private void checkCancel()
+    private ProcMon.ExitCode checkCancel()
     {
-        if(isCancelled() || Thread.interrupted())
+        if(procMon != null)
         {
-            if(procMon != null && !procMon.isComplete())
+            if(isCancelled() || Thread.interrupted() || Thread.currentThread().isInterrupted())
             {
                 procMon.destroy();
+                try {
+                    if (is != null)is.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                return ProcMon.ExitCode.ERROR;
             }
+            return procMon.getExitCode();
         }
+        return ProcMon.ExitCode.NULL;
     }
 
 
     @Override
     public void done()
     {
+        try {
+            if(is != null)is.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        if(procMon.getExitCode() == ProcMon.ExitCode.RUNNING)
+        {
+            procMon.destroy();
+        }
         if (procMon.isExitError())
         {
-            statusLabel.append("~~~~~~~Error~~~~~~~\n");
+            if (statusLabel != null)statusLabel.append("~~~~~~~Error~~~~~~~\n");
         }
         else
         {
-            statusLabel.append("~~~~~~~Finished~~~~~~~\n");
+            if (statusLabel != null)statusLabel.append("~~~~~~~Finished~~~~~~~\n");
         }
     }
 }
