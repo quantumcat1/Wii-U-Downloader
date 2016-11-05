@@ -10,6 +10,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 
@@ -70,7 +71,7 @@ public class MainWindow extends JPanel implements ActionListener
         descLabel.setWrapStyleWord(true);
         Font labelFont = descLabel.getFont();
         descLabel.setFont(new Font(labelFont.getName(), Font.PLAIN, 24));
-        descLabel.setMaximumSize(new Dimension(500, 100));
+        descLabel.setMaximumSize(new Dimension(900, 100));
         descLabel.setMinimumSize(new Dimension(500,100));
         add(descLabel);
 
@@ -298,6 +299,20 @@ public class MainWindow extends JPanel implements ActionListener
         frame.setLocationRelativeTo(null);
         frame.pack();
         frame.setVisible(true);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                if (JOptionPane.showConfirmDialog(frame,
+                    "Are you sure to close this window?", "Really closing?",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
+                {
+                    System.exit(0);
+                }
+            }
+        });
     }
 
     public static void main(String[] args) throws IOException
