@@ -9,6 +9,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -123,58 +126,61 @@ public class Download
         {
             f.mkdir();
         }
+
+        ThreadManager tm = new ThreadManager(3);
         //now to download the games
         for(Game game : gameList.getSelectedList())
         {
-            String name = game.getTitle() + " Update";
-            String updateId = game.getId().replaceAll("00050000", "0005000E");
-
-            ProcessBuilder pb2 = new ProcessBuilder("NUSgrabber.exe", updateId);
-            ProcessBuilder pb1 = new ProcessBuilder("NUSgrabber.exe", game.getId());
-
-            pb1.redirectErrorStream(true);
-            pb2.redirectErrorStream(true);
-
-            pb1.redirectOutput(new File("./" + game.getTitle() + "_log.txt"));
-
-
-            Process process_game = pb1.start();
-            DownloadThread dt_game = new DownloadThread(process_game, game.getTitle());
-            DownloadThread dt_update = null;
-            dt_game.execute();
-
+            tm.add(game);
             if(gameList.isUpdates())
             {
-                pb2.redirectOutput(new File("./" + name + "_log.txt"));
-                Process process_update = pb2.start();
-                dt_update = new DownloadThread(process_update, name);
-                dt_update.execute();
+                tm.add(game.update());
+              //hopefully mark the id folder as delete on exit
+                f = new File("./" + game.update().getId() + "/");
+                f.deleteOnExit();
             }
+            //hopefully mark the id folder as delete on exit
+            f = new File("./" + game.getId() + "/");
+            f.deleteOnExit();
+        }
 
-            while(!dt_game.isDone() || (!dt_update.isDone() && dt_update != null)){
-                //let them finish before moving on
-            }
+        Map<Game, DownloadThread> completed = new HashMap<Game, DownloadThread>();
 
-            int exitVal = dt_game.exitCode;
-
-            if(exitVal > -1)
+        while(completed.size() < tm.getFutures().size())
+        {
+            for (Map.Entry<Game,DownloadThread> entry : tm.getFutures().entrySet())
             {
+                Game game = entry.getKey();
+                DownloadThread dt = entry.getValue();
 
-                f = new File("./" + game.getId());
-                if(!f.exists())
+                if(dt.isDone() && (completed.get(game) == null))
                 {
-                    f.mkdir();
-                }
+                    completed.put(game, dt);
+                    int exitVal = -1;
+                    try {
+                        exitVal = dt.get();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    }
+                    if(exitVal > -1)
+                    {
+                        f = new File("./" + game.getId());
+                        if(!f.exists())
+                        {
+                            f.mkdir();
+                        }
 
-                f = new File("./install/" + game.getTitle() + "/");
-                if(!f.exists())
-                {
-                    f.mkdir();
-                }
+                        f = new File("./install/" + game.getTitle() + "/");
+                        if(!f.exists())
+                        {
+                            f.mkdir();
+                        }
 
-                copyFile("./tickets/" + game.getTitle() + "/" + game.getId() + "/title.tik", "./" + game.getId() + "/title.tik", false);
-                copyFile("./" + game.getId() + "/", "./install/" + game.getTitle() + "/", false);
-                deleteDirectory(new File("./" + game.getId() + "/"));
+                        copyFile("./tickets/" + game.getTitle() + "/" + game.getId() + "/title.tik", "./" + game.getId() + "/title.tik", false);
+                        copyFile("./" + game.getId() + "/", "./install/" + game.getTitle() + "/", false);
+                        deleteDirectory(new File("./" + game.getId() + "/"));
+                    }
+                }
             }
         }
         deleteDirectory(new File("./temp/"));
