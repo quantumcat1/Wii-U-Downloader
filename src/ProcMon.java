@@ -1,37 +1,88 @@
 
 public class ProcMon implements Runnable
 {
+    public static enum ExitCode
+    {
+        NULL, RUNNING, SUCCESS, CONNECTION_ERROR, ERROR
+    };
+    public ExitCode test = ExitCode.SUCCESS;
+    private final Process _proc;
+    private volatile boolean _complete;
 
-	public ProcMon(Process proc)
-	{
-		_proc = proc;
-		_complete = false;
-	}
 
-  private final Process _proc;
-  private volatile boolean _complete;
+    public ProcMon(Process proc)
+    {
+        _proc = proc;
+        _complete = false;
 
-  public boolean isComplete() { return _complete; }
+    }
 
-  public void run() {
-    try {
-		_proc.waitFor();
-	} catch (InterruptedException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-    _complete = true;
-  }
 
-  public static ProcMon create(Process proc) {
-    ProcMon procMon = new ProcMon(proc);
-    Thread t = new Thread(procMon);
-    t.start();
-    return procMon;
-  }
+    public boolean isComplete()
+    {
+        return _complete;
+    }
 
-  public Process getProcess()
-  {
-	  return _proc;
-  }
+    public void run()
+    {
+        try
+        {
+            _proc.waitFor();
+        }
+        catch (InterruptedException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        _complete = true;
+    }
+
+    public static ProcMon create(Process proc)
+    {
+        ProcMon procMon = new ProcMon(proc);
+        Thread t = new Thread(procMon);
+        t.start();
+        return procMon;
+    }
+
+    public ExitCode getExitCode()
+    {
+        if (_proc == null)
+        {
+            return ExitCode.NULL;
+        }
+        try
+        {
+            int exit = _proc.exitValue();
+            if(exit == -3)
+            {
+                return ExitCode.CONNECTION_ERROR;
+            }
+            else if(exit < 0)
+            {
+                return ExitCode.ERROR;
+            }
+            else
+            {
+                return ExitCode.SUCCESS;
+            }
+        }
+        catch (Exception e)
+        {
+            return ExitCode.RUNNING;
+        }
+    }
+
+    public boolean isExitError()
+    {
+        ExitCode exit = getExitCode();
+        if(exit != ExitCode.SUCCESS)
+            return false;
+        return true;
+    }
+
+    public void destroy()
+    {
+        _proc.destroy();
+    }
 }

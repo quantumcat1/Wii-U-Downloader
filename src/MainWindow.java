@@ -44,14 +44,11 @@ public class MainWindow extends JPanel implements ActionListener
     private JCheckBox updatesCheck;
     public JTextArea statusLabel;
     private JPanel buttonPane;
-    /*private JButton btnGo;
-    private JTable clickTable;
-    private GameList gameList;
-    private JTextArea statusLabel;
-    private JTextArea descLabel;
-*/
+    private static ThreadManager tm;
+
     public void initialise() throws IOException
     {
+        tm = new ThreadManager(2);
         gameList = new GameList();
         buttonPane = new JPanel();
 
@@ -78,11 +75,6 @@ public class MainWindow extends JPanel implements ActionListener
         JLabel blankLabel1 = new JLabel("   ");
         blankLabel1.setMinimumSize(new Dimension(30, 30));
         add(blankLabel1);
-
-
-
-
-        //gameList = new GameList();
 
         gameTable = new JTable();
 
@@ -158,62 +150,9 @@ public class MainWindow extends JPanel implements ActionListener
         btnGo.setMinimumSize(new Dimension(100, 40));
         add(btnGo);
 
-
-
-
-
         add(new JScrollPane(statusLabel));
 
         update();
-        /*gameList = new GameList();
-
-        statusLabel = new JTextArea();
-        statusLabel.setMaximumSize(new Dimension(500, 100));
-        statusLabel.setMinimumSize(new Dimension(500,100));
-        statusLabel.setLineWrap(true);
-        statusLabel.setEditable(false);
-        statusLabel.setWrapStyleWord(true);
-
-        add(statusLabel);
-
-        descLabel = new JTextArea("Select the games you want to download (hold Ctrl while clicking to select multiple):");
-        descLabel.setLineWrap(true);
-        descLabel.setEditable(false);
-        descLabel.setWrapStyleWord(true);
-        Font labelFont = descLabel.getFont();
-        descLabel.setFont(new Font(labelFont.getName(), Font.PLAIN, 24));
-        descLabel.setMaximumSize(new Dimension(500, 100));
-        descLabel.setMinimumSize(new Dimension(500,100));
-        add(descLabel);
-
-        clickTable = new JTable();
-
-        setTableRows();
-
-        clickTable.getSelectionModel().addListSelectionListener(new ListSelectionListener()
-        {
-            public void valueChanged(ListSelectionEvent e)
-            {
-                gameList.setSelection(clickTable.getSelectedRows());
-            }
-        });
-
-        clickTable.setFont(new Font(clickTable.getFont().getName(), Font.PLAIN, 16));
-        clickTable.setMaximumSize(new Dimension(500, 30));
-        clickTable.setMinimumSize(new Dimension(500, 30));
-        clickTable.setRowSelectionAllowed(true);
-        clickTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        clickTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-        //add(clickTable);
-
-        add(new JScrollPane(clickTable));
-
-        btnGo = new JButton("Go");
-        btnGo.setActionCommand("go");
-        btnGo.addActionListener(this);
-        add(btnGo);
-
-        update();*/
     }
 
     private void setTableRows()
@@ -234,7 +173,6 @@ public class MainWindow extends JPanel implements ActionListener
     }
 
     private void update() {
-        //System.out.println("updating");
 
         adjustJTableRowSizes(gameTable);
         for (int i = 0; i < gameTable.getColumnCount(); i++) {
@@ -309,6 +247,7 @@ public class MainWindow extends JPanel implements ActionListener
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
                 {
+                    tm.cancel();
                     System.exit(0);
                 }
             }
@@ -349,7 +288,7 @@ public class MainWindow extends JPanel implements ActionListener
                     @Override
                     public void run()
                     {
-                        Download dS = new Download(statusLabel);
+                        Download dS = new Download(statusLabel, tm);
 
                         try {
                             dS.download(gameList);

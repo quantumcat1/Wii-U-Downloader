@@ -20,9 +20,11 @@ import javax.swing.JTextArea;
 public class Download
 {
     public JTextArea statusLabel;
-    public Download(JTextArea statusLabel)
+    ThreadManager tm;
+    public Download(JTextArea statusLabel, ThreadManager tm)
     {
         this.statusLabel = statusLabel;
+        this.tm = tm;
     }
 
     private static void copyFile(String pathIn, String pathOut, boolean bDeleteOnExit) throws IOException
@@ -127,7 +129,7 @@ public class Download
             f.mkdir();
         }
 
-        ThreadManager tm = new ThreadManager(3);
+        //ThreadManager tm = new ThreadManager(3);
         //now to download the games
         for(Game game : gameList.getSelectedList())
         {
@@ -156,13 +158,13 @@ public class Download
                 if(dt.isDone() && (completed.get(game) == null))
                 {
                     completed.put(game, dt);
-                    int exitVal = -1;
+                    ProcMon.ExitCode exit = ProcMon.ExitCode.ERROR;
                     try {
-                        exitVal = dt.get();
+                        exit = dt.get();
                     } catch (ExecutionException e) {
                         e.printStackTrace();
                     }
-                    if(exitVal > -1)
+                    if(exit == ProcMon.ExitCode.SUCCESS)
                     {
                         f = new File("./" + game.getId());
                         if(!f.exists())

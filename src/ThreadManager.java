@@ -1,11 +1,8 @@
-import java.io.File;
-import javax.swing.SwingWorker;
-import java.io.IOException;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class ThreadManager
 {
@@ -20,20 +17,7 @@ public class ThreadManager
 
     public boolean add(Game game)
     {
-        ProcessBuilder pb = new ProcessBuilder("NUSgrabber.exe", game.getId());
-        pb.redirectErrorStream(true);
-        pb.redirectOutput(new File("./" + game.getTitle() + "_log.txt"));
-        Process process;
-        try
-        {
-            process = pb.start();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            return false;
-        }
-        DownloadThread dt = new DownloadThread(process, game.getTitle());
+        DownloadThread dt = new DownloadThread(game);
         executor.execute(dt);
         futures.put(game, dt);
         return true;
@@ -42,5 +26,15 @@ public class ThreadManager
     public Map<Game, DownloadThread> getFutures()
     {
         return futures;
+    }
+
+    public void cancel()
+    {
+        //send cancel message to all threads (since shutdown() doesn't seem to do this)
+        for (DownloadThread value : futures.values())
+        {
+            value.cancel(true);
+        }
+        executor.shutdown();
     }
 }
