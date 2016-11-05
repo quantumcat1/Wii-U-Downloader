@@ -1,3 +1,4 @@
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -27,12 +28,12 @@ import javax.swing.ListSelectionModel;
 
 public class MainWindow extends JPanel implements ActionListener
 {
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 1340313595349448384L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1340313595349448384L;
 
-	private JTable gameTable;
+    private JTable gameTable;
     private JButton btnGo;
     private JTextArea descLabel;
     private GameList gameList;
@@ -42,20 +43,20 @@ public class MainWindow extends JPanel implements ActionListener
     private JCheckBox updatesCheck;
     public JTextArea statusLabel;
     private JPanel buttonPane;
-	/*private JButton btnGo;
-	private JTable clickTable;
-	private GameList gameList;
-	private JTextArea statusLabel;
-	private JTextArea descLabel;
+    /*private JButton btnGo;
+    private JTable clickTable;
+    private GameList gameList;
+    private JTextArea statusLabel;
+    private JTextArea descLabel;
 */
-	public void initialise() throws IOException
-	{
-		gameList = new GameList();
-		buttonPane = new JPanel();
+    public void initialise() throws IOException
+    {
+        gameList = new GameList();
+        buttonPane = new JPanel();
 
-    	buttonPane.setLayout(new BoxLayout(buttonPane, BoxLayout.LINE_AXIS));
+        buttonPane.setLayout(new BoxLayout(buttonPane, BoxLayout.LINE_AXIS));
 
-    	statusLabel = new JTextArea();
+        statusLabel = new JTextArea();
         statusLabel.setMaximumSize(new Dimension(500, 100));
         statusLabel.setMinimumSize(new Dimension(500,100));
         statusLabel.setLineWrap(true);
@@ -87,13 +88,13 @@ public class MainWindow extends JPanel implements ActionListener
         setTableRows();
 
         gameTable.getSelectionModel().addListSelectionListener(new ListSelectionListener()
-		{
-        	public void valueChanged(ListSelectionEvent e)
-        	{
-        		gameList.setSelection(gameTable.getSelectedRows());
-        		update();
-        	}
-		});
+        {
+            public void valueChanged(ListSelectionEvent e)
+            {
+                gameList.setSelection(gameTable.getSelectedRows());
+                update();
+            }
+        });
 
 
         gameTable.setFont(new Font(labelFont.getName(), Font.PLAIN, 16));
@@ -163,9 +164,9 @@ public class MainWindow extends JPanel implements ActionListener
         add(new JScrollPane(statusLabel));
 
         update();
-		/*gameList = new GameList();
+        /*gameList = new GameList();
 
-    	statusLabel = new JTextArea();
+        statusLabel = new JTextArea();
         statusLabel.setMaximumSize(new Dimension(500, 100));
         statusLabel.setMinimumSize(new Dimension(500,100));
         statusLabel.setLineWrap(true);
@@ -189,12 +190,12 @@ public class MainWindow extends JPanel implements ActionListener
         setTableRows();
 
         clickTable.getSelectionModel().addListSelectionListener(new ListSelectionListener()
-		{
-        	public void valueChanged(ListSelectionEvent e)
-        	{
-        		gameList.setSelection(clickTable.getSelectedRows());
-        	}
-		});
+        {
+            public void valueChanged(ListSelectionEvent e)
+            {
+                gameList.setSelection(clickTable.getSelectedRows());
+            }
+        });
 
         clickTable.setFont(new Font(clickTable.getFont().getName(), Font.PLAIN, 16));
         clickTable.setMaximumSize(new Dimension(500, 30));
@@ -206,32 +207,32 @@ public class MainWindow extends JPanel implements ActionListener
 
         add(new JScrollPane(clickTable));
 
-		btnGo = new JButton("Go");
+        btnGo = new JButton("Go");
         btnGo.setActionCommand("go");
         btnGo.addActionListener(this);
         add(btnGo);
 
         update();*/
-	}
+    }
 
-	private void setTableRows()
+    private void setTableRows()
     {
-    	DefaultTableModel dtm = new DefaultTableModel(0, 0);
+        DefaultTableModel dtm = new DefaultTableModel(0, 0);
         String[] header = new String[]{"Name", "Size"};
         dtm.setColumnIdentifiers(header);
-    	for(Game game : gameList.getList())
+        for(Game game : gameList.getList())
         {
-        	String sizeColumn = Integer.toString(game.getSize()) + "MB";
-        	if(sizeColumn.equals("0MB"))
-        	{
-        		sizeColumn = "?";
-        	}
-        	dtm.addRow(new Object[]{game.getTitle(), sizeColumn});
+            String sizeColumn = Integer.toString(game.getSize()) + "MB";
+            if(sizeColumn.equals("0MB"))
+            {
+                sizeColumn = "?";
+            }
+            dtm.addRow(new Object[]{game.getTitle(), sizeColumn});
         }
         gameTable.setModel(dtm);
     }
 
-	private void update() {
+    private void update() {
         //System.out.println("updating");
 
         adjustJTableRowSizes(gameTable);
@@ -278,12 +279,12 @@ public class MainWindow extends JPanel implements ActionListener
         col.setWidth(width);
     }
 
-	public MainWindow() throws IOException
+    public MainWindow() throws IOException
     {
         initialise();
     }
 
-	private static void createWindow() throws IOException
+    private static void createWindow() throws IOException
     {
         JFrame frame = new JFrame("Download games");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -299,51 +300,51 @@ public class MainWindow extends JPanel implements ActionListener
         frame.setVisible(true);
     }
 
-	public static void main(String[] args) throws IOException
+    public static void main(String[] args) throws IOException
     {
         createWindow();
     }
 
-	@Override
+    @Override
     public void actionPerformed(ActionEvent e)
     {
-    	switch(e.getActionCommand())
-    	{
-	    	case "alpha":
-	    		gameList.sortList(GameList.Sort.ALPHA);
-	    		setTableRows();
-	    		update();
-	    		break;
-	    	case "up":
-	    		gameList.sortList(GameList.Sort.UP);
-	    		setTableRows();
-	    		update();
-	    		break;
-	    	case "down":
-	    		gameList.sortList(GameList.Sort.DOWN);
-	    		setTableRows();
-	    		update();
-	    		break;
-	    	case "updates":
-	    		gameList.setUpdates(updatesCheck.isEnabled());
-	    		break;
-    		case "go":
-    			new Thread()
-    			{
-    				@Override
-    				public void run()
-    				{
-    					Download dS = new Download(statusLabel);
+        switch(e.getActionCommand())
+        {
+            case "alpha":
+                gameList.sortList(GameList.Sort.ALPHA);
+                setTableRows();
+                update();
+                break;
+            case "up":
+                gameList.sortList(GameList.Sort.UP);
+                setTableRows();
+                update();
+                break;
+            case "down":
+                gameList.sortList(GameList.Sort.DOWN);
+                setTableRows();
+                update();
+                break;
+            case "updates":
+                gameList.setUpdates(updatesCheck.isEnabled());
+                break;
+            case "go":
+                new Thread()
+                {
+                    @Override
+                    public void run()
+                    {
+                        Download dS = new Download(statusLabel);
 
-    					try {
-							dS.download(gameList);
-						} catch (IOException | InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-    				}
-    			}.start();
-    		break;
-    	}
+                        try {
+                            dS.download(gameList);
+                        } catch (IOException | InterruptedException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                    }
+                }.start();
+            break;
+        }
     }
 }
