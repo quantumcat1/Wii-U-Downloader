@@ -16,33 +16,38 @@ import javax.swing.JTextArea;
 
 public class Download
 {
-	public JTextArea statusLabel;
-	public Download(JTextArea statusLabel)
-	{
-		this.statusLabel = statusLabel;
-	}
+    public JTextArea statusLabel;
+    public Download(JTextArea statusLabel)
+    {
+        this.statusLabel = statusLabel;
+    }
 
-	private static void copyFile(String pathIn, String pathOut) throws IOException
+    private static void copyFile(String pathIn, String pathOut, boolean bDeleteOnExit) throws IOException
     {
         File infile = new File(pathIn);
         File outfile = new File(pathOut);
 
         if(infile.isDirectory())
         {
-        	File[] files = infile.listFiles();
-        	for(File f : files)
-        	{
-        		copyFile(f.getPath().toString(), pathOut);
-        	}
+            File[] files = infile.listFiles();
+            for(File f : files)
+            {
+                copyFile(f.getPath().toString(), pathOut, bDeleteOnExit);
+            }
         }
 
         if(outfile.isDirectory())
         {
-        	File[] files = outfile.listFiles();
-        	for(File f : files)
-        	{
-        		copyFile(pathIn, f.getPath().toString());
-        	}
+            File[] files = outfile.listFiles();
+            for(File f : files)
+            {
+                copyFile(pathIn, f.getPath().toString(), bDeleteOnExit);
+            }
+        }
+
+        if(bDeleteOnExit)
+        {
+            outfile.deleteOnExit();
         }
 
         FileInputStream instream = new FileInputStream(infile);
@@ -102,80 +107,80 @@ public class Download
         }
     }
 
-	public void download(GameList gameList) throws IOException //throws IOException, InterruptedException
+    public void download(GameList gameList) throws IOException //throws IOException, InterruptedException
 , InterruptedException
-	{
-		//move nusgrabber into temp folder
-		extractZip("Nusgrabber.zip");
+    {
+        //move nusgrabber into temp folder
+        extractZip("Nusgrabber.zip");
 
-		copyFile("./temp/Nusgrabber/NUSgrabber.exe", "./NUSgrabber.exe");
-		copyFile("./temp/Nusgrabber/vcruntime140.dll", "./vcruntime140.dll");
-		copyFile("./temp/Nusgrabber/wget.exe", "./wget.exe");
+        copyFile("./temp/Nusgrabber/NUSgrabber.exe", "./NUSgrabber.exe", true);
+        copyFile("./temp/Nusgrabber/vcruntime140.dll", "./vcruntime140.dll", true);
+        copyFile("./temp/Nusgrabber/wget.exe", "./wget.exe", true);
 
-		//make install folder
-		File f = new File("./install/");
-		if(!f.exists())
-		{
-			f.mkdir();
-		}
-		//now to download the games
-		for(Game game : gameList.getSelectedList())
-		{
-			String name = game.getTitle() + " Update";
-			String updateId = game.getId().replaceAll("00050000", "0005000E");
+        //make install folder
+        File f = new File("./install/");
+        if(!f.exists())
+        {
+            f.mkdir();
+        }
+        //now to download the games
+        for(Game game : gameList.getSelectedList())
+        {
+            String name = game.getTitle() + " Update";
+            String updateId = game.getId().replaceAll("00050000", "0005000E");
 
-			ProcessBuilder pb2 = new ProcessBuilder("NUSgrabber.exe", updateId);
-			ProcessBuilder pb1 = new ProcessBuilder("NUSgrabber.exe", game.getId());
+            ProcessBuilder pb2 = new ProcessBuilder("NUSgrabber.exe", updateId);
+            ProcessBuilder pb1 = new ProcessBuilder("NUSgrabber.exe", game.getId());
 
-			pb1.redirectErrorStream(true);
-			pb2.redirectErrorStream(true);
+            pb1.redirectErrorStream(true);
+            pb2.redirectErrorStream(true);
 
-			pb1.redirectOutput(new File("./" + game.getTitle() + "_log.txt"));
+            pb1.redirectOutput(new File("./" + game.getTitle() + "_log.txt"));
 
 
-			Process process_game = pb1.start();
-			DownloadThread dt_game = new DownloadThread(process_game, game.getTitle());
-			DownloadThread dt_update = null;
-			dt_game.execute();
+            Process process_game = pb1.start();
+            DownloadThread dt_game = new DownloadThread(process_game, game.getTitle());
+            DownloadThread dt_update = null;
+            dt_game.execute();
 
-			if(gameList.isUpdates())
-			{
-				pb2.redirectOutput(new File("./" + name + "_log.txt"));
-				Process process_update = pb2.start();
-				dt_update = new DownloadThread(process_update, name);
-				dt_update.execute();
-			}
+            if(gameList.isUpdates())
+            {
+                pb2.redirectOutput(new File("./" + name + "_log.txt"));
+                Process process_update = pb2.start();
+                dt_update = new DownloadThread(process_update, name);
+                dt_update.execute();
+            }
 
-			while(!dt_game.isDone() || (!dt_update.isDone() && dt_update != null)){
-				//let them finish before moving on
-			}
+            while(!dt_game.isDone() || (!dt_update.isDone() && dt_update != null)){
+                //let them finish before moving on
+            }
 
-			int exitVal = dt_game.exitCode;
+            int exitVal = dt_game.exitCode;
 
-			if(exitVal > -1)
-			{
+            if(exitVal > -1)
+            {
 
-				f = new File("./" + game.getId());
-				if(!f.exists())
-				{
-					f.mkdir();
-				}
+                f = new File("./" + game.getId());
+                if(!f.exists())
+                {
+                    f.mkdir();
+                }
 
-				f = new File("./install/" + game.getTitle() + "/");
-				if(!f.exists())
-				{
-					f.mkdir();
-				}
+                f = new File("./install/" + game.getTitle() + "/");
+                if(!f.exists())
+                {
+                    f.mkdir();
+                }
 
-				copyFile("./tickets/" + game.getTitle() + "/" + game.getId() + "/title.tik", "./" + game.getId() + "/title.tik");
-				copyFile("./" + game.getId() + "/", "./install/" + game.getTitle() + "/");
-				deleteDirectory(new File("./" + game.getId() + "/"));
-			}
-		}
-		deleteDirectory(new File("./temp/"));
-	}
+                copyFile("./tickets/" + game.getTitle() + "/" + game.getId() + "/title.tik", "./" + game.getId() + "/title.tik", false);
+                copyFile("./" + game.getId() + "/", "./install/" + game.getTitle() + "/", false);
+                deleteDirectory(new File("./" + game.getId() + "/"));
+            }
+        }
+        deleteDirectory(new File("./temp/"));
+    }
 
-	private boolean deleteDirectory(File directory)
+    private boolean deleteDirectory(File directory)
     {
         if (directory.exists())
         {
