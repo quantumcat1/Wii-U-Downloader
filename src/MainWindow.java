@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -26,6 +27,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 
 public class MainWindow extends JPanel implements ActionListener
 {
@@ -44,22 +46,27 @@ public class MainWindow extends JPanel implements ActionListener
     private JCheckBox updatesCheck;
     private JCheckBox gameCheck;
     public JTextArea statusLabel;
-    private JPanel buttonPane;
+    private JPanel radioPane;
     private JPanel checkPane;
+    private JPanel downloadPane;
+    private JComboBox<String> threadCombo;
     private static ThreadManager tm;
 
     public void initialise() throws IOException
     {
         tm = new ThreadManager(2);
         gameList = new GameList();
-        buttonPane = new JPanel();
+        radioPane = new JPanel();
         checkPane = new JPanel();
+        downloadPane = new JPanel();
 
-        buttonPane.setLayout(new BoxLayout(buttonPane, BoxLayout.LINE_AXIS));
+        radioPane.setLayout(new BoxLayout(radioPane, BoxLayout.LINE_AXIS));
         checkPane.setLayout(new BoxLayout(checkPane, BoxLayout.LINE_AXIS));
+        downloadPane.setLayout(new BoxLayout(downloadPane, BoxLayout.LINE_AXIS));
 
         statusLabel = new JTextArea();
-        statusLabel.setMaximumSize(new Dimension(500, 100));
+        statusLabel.setMaximumSize(new Dimension(900, 100));
+        //statusLabel.setMaximumSize(new Dimension(500, 100));
         statusLabel.setMinimumSize(new Dimension(500,100));
         statusLabel.setLineWrap(true);
         statusLabel.setEditable(false);
@@ -132,11 +139,11 @@ public class MainWindow extends JPanel implements ActionListener
 
         alphabeticalRadio.setSelected(true);
 
-        buttonPane.add(alphabeticalRadio);
-        buttonPane.add(sizeDownRadio);
-        buttonPane.add(sizeUpRadio);
+        radioPane.add(alphabeticalRadio);
+        radioPane.add(sizeDownRadio);
+        radioPane.add(sizeUpRadio);
 
-        add(buttonPane);
+        add(radioPane);
 
         updatesCheck = new JCheckBox("updates");
         updatesCheck.setActionCommand("updates");
@@ -152,15 +159,38 @@ public class MainWindow extends JPanel implements ActionListener
 
         checkPane.add(gameCheck);
 
+        gameCheck.setSelected(true);
+
         add(checkPane);
+
+        String[] threads = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+        threadCombo = new JComboBox<String>(threads);
+        threadCombo.setSelectedIndex(1);
+        threadCombo.setMaximumSize(new Dimension(40, 40));
+        threadCombo.setMinimumSize(new Dimension(40, 40));
+        threadCombo.addActionListener(this);
+
+        JLabel text = new JLabel("Use ", SwingConstants.RIGHT);
+        text.setMaximumSize(new Dimension(40, 40));
+        text.setMinimumSize(new Dimension(40, 40));
+        JLabel text2 = new JLabel(" threads");
+        text2.setMaximumSize(new Dimension(80, 40));
+        text2.setMinimumSize(new Dimension(80, 40));
+
+        downloadPane.add(text);
+        downloadPane.add(threadCombo);
+        downloadPane.add(text2);
 
         btnGo = new JButton("Download");
         btnGo.setActionCommand("go");
         btnGo.addActionListener(this);
         btnGo.setMaximumSize(new Dimension(100, 40));
         btnGo.setMinimumSize(new Dimension(100, 40));
-        btnGo.setAlignmentX(Component.CENTER_ALIGNMENT);
-        add(btnGo);
+        downloadPane.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        downloadPane.add(btnGo);
+
+        add(downloadPane);
 
         add(new JScrollPane(statusLabel));
 
@@ -255,7 +285,7 @@ public class MainWindow extends JPanel implements ActionListener
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
                 if (JOptionPane.showConfirmDialog(frame,
-                    "Are you sure to close this window?", "Really closing?",
+                    "Are you sure you want to quit downloading?", "Quit?",
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
                 {
@@ -295,7 +325,7 @@ public class MainWindow extends JPanel implements ActionListener
                 gameList.setUpdates(updatesCheck.isEnabled());
                 break;
             case "game":
-                //gameList.setGame(gameCheck.isEnabled());
+                gameList.setGame(gameCheck.isEnabled());
                 break;
             case "go":
                 new Thread()
