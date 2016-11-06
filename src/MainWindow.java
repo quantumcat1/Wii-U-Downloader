@@ -54,6 +54,7 @@ public class MainWindow extends JPanel implements ActionListener, ItemListener
     private JComboBox<String> threadCombo;
     private static ThreadManager tm;
     private int threads;
+    private static Download download;
 
     public void initialise() throws IOException
     {
@@ -160,6 +161,7 @@ public class MainWindow extends JPanel implements ActionListener, ItemListener
         gameCheck.setActionCommand("game");
         gameCheck.setText("Get game?");
         gameCheck.addActionListener(this);
+        gameList.setGame(true);
 
         checkPane.add(gameCheck);
 
@@ -293,7 +295,14 @@ public class MainWindow extends JPanel implements ActionListener, ItemListener
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
                 {
-                    tm.cancel();
+                    if(tm != null)
+                    {
+                        tm.cancel();
+                    }
+                    if(download != null)
+                    {
+                        download.deleteIdFolders();//change this to delete all temp stuff
+                    }
                     System.exit(0);
                 }
             }
@@ -326,10 +335,10 @@ public class MainWindow extends JPanel implements ActionListener, ItemListener
                 update();
                 break;
             case "updates":
-                gameList.setUpdates(updatesCheck.isEnabled());
+                gameList.setUpdates(updatesCheck.isSelected());
                 break;
             case "game":
-                gameList.setGame(gameCheck.isEnabled());
+                gameList.setGame(gameCheck.isSelected());
                 break;
             case "go":
                 new Thread()
@@ -337,10 +346,10 @@ public class MainWindow extends JPanel implements ActionListener, ItemListener
                     @Override
                     public void run()
                     {
-                        Download dS = new Download(statusLabel, tm, threads);
+                        download = new Download(statusLabel, tm, threads, gameList);
 
                         try {
-                            dS.download(gameList);
+                            download.download();
                         } catch (IOException | InterruptedException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();

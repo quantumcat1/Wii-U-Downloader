@@ -23,12 +23,14 @@ public class Download
 {
     public JTextArea statusLabel;
     ThreadManager tm;
+    GameList gameList;
 
-    public Download(JTextArea statusLabel, ThreadManager tm, int threads)
+    public Download(JTextArea statusLabel, ThreadManager tm, int threads, GameList gameList)
     {
         this.statusLabel = statusLabel;
         this.tm = tm;
         this.tm = new ThreadManager(threads);
+        this.gameList = gameList;
     }
 
     private static void copyFile(String pathIn, String pathOut, boolean bDeleteOnExit) throws IOException
@@ -117,7 +119,7 @@ public class Download
         }
     }
 
-    public void download(GameList gameList) throws IOException, InterruptedException
+    public void download() throws IOException, InterruptedException
     {
         //move nusgrabber into temp folder
         extractZip("Nusgrabber.zip");
@@ -190,15 +192,32 @@ public class Download
                             copyFile("./tickets/" + game.getTitle() + "/" + game.getId() + "/title.tik", "./" + game.getId() + "/title.tik", false);
                         }
                         copyFile("./" + game.getId() + "/", "./install/" + game.getTitle() + "/", false);
-                        deleteDirectory(new File("./" + game.getId() + "/"));
                     }
                 }
             }
         }
+        deleteIdFolders();
         deleteDirectory(new File("./temp/"));
         deleteDirectory(new File("./NUSgrabber.exe"));
         deleteDirectory(new File("./vcruntime140.dll"));
         deleteDirectory(new File("./wget.exe"));
+    }
+
+    public void deleteIdFolders()
+    {
+        for(Game game : gameList.getSelectedList())
+        {
+            File f = new File ("./" + game.getId() + "/");
+            File f2 = new File ("./" + game.update().getId() + "/");
+            if(gameList.isGame())
+            {
+                deleteDirectory(f);
+            }
+            if(gameList.isUpdates())
+            {
+                deleteDirectory(f2);
+            }
+        }
     }
 
     private boolean deleteDirectory(File directory)
