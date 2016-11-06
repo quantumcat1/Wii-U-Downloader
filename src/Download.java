@@ -194,6 +194,9 @@ public class Download
             }
         }
         deleteDirectory(new File("./temp/"));
+        deleteDirectory(new File("./NUSgrabber.exe"));
+        deleteDirectory(new File("./vcruntime140.dll"));
+        deleteDirectory(new File("./wget.exe"));
     }
 
     private boolean deleteDirectory(File directory)
