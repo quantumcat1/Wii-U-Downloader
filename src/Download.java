@@ -133,7 +133,13 @@ public class Download
         //now to download the games
         for(Game game : gameList.getSelectedList())
         {
-            tm.add(game);
+            if(gameList.isGame())
+            {
+                tm.add(game);
+                //hopefully mark the id folder as delete on exit
+                f = new File("./" + game.getId() + "/");
+                f.deleteOnExit();
+            }
             if(gameList.isUpdates())
             {
                 tm.add(game.update());
@@ -141,9 +147,6 @@ public class Download
                 f = new File("./" + game.update().getId() + "/");
                 f.deleteOnExit();
             }
-            //hopefully mark the id folder as delete on exit
-            f = new File("./" + game.getId() + "/");
-            f.deleteOnExit();
         }
 
         Map<Game, DownloadThread> completed = new HashMap<Game, DownloadThread>();
