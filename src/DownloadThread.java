@@ -55,19 +55,14 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, String> //Thre
             }
             procMon = ProcMon.create(process);
         }
-        while(!procMon.isComplete())
+        while((!procMon.isComplete() && exit == ProcMon.ExitCode.RUNNING) || exit == ProcMon.ExitCode.NULL)
         {
-            exit = checkCancel();
-            if(exit != ProcMon.ExitCode.RUNNING)
-            {
-                return exit;
-            }
             try
             {
                 int i = 0;
                 final StringBuilder s = new StringBuilder();
                 i = is.read();
-                while(i != -1)
+                while(i != -1 && exit == ProcMon.ExitCode.RUNNING)
                 {
                     s.append((char)i);
                     if(i == '\n')
@@ -83,6 +78,7 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, String> //Thre
                         s.setLength(0);
                     }
                     i = is.read();
+                    exit = checkCancel();
                 }
                 //get last line case it doesn't end with a newline character
                 publish(s.toString());
@@ -91,6 +87,7 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, String> //Thre
             {
                 ioe.printStackTrace();
             }
+            exit = checkCancel();
         }
         return procMon.getExitCode();
     }
@@ -158,10 +155,10 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, String> //Thre
         return ProcMon.ExitCode.NULL;
     }
 
-
     @Override
     public void done()
     {
+        //need to think of a better thing to do here
         try {
             if(is != null)is.close();
         } catch (IOException e) {
@@ -172,14 +169,7 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, String> //Thre
         {
             procMon.destroy();
         }
-        if (procMon.isExitError())
-        {
-            if (statusLabel != null)statusLabel.append("~~~~~~~Error~~~~~~~\n");
-        }
-        else
-        {
-            if (statusLabel != null)statusLabel.append("~~~~~~~Finished~~~~~~~\n");
-        }
+        if (statusLabel != null)statusLabel.append("~~~~~~~Finished~~~~~~~ Exit code: " + procMon.getProcess().exitValue());//shouldn't be allowed to directly access the process - but how else to get the real exit code?
     }
 }
 

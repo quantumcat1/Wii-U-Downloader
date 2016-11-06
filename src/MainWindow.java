@@ -1,6 +1,8 @@
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.IOException;
 
 import javax.swing.JButton;
@@ -29,7 +31,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 
-public class MainWindow extends JPanel implements ActionListener
+public class MainWindow extends JPanel implements ActionListener, ItemListener
 {
     /**
      *
@@ -51,10 +53,12 @@ public class MainWindow extends JPanel implements ActionListener
     private JPanel downloadPane;
     private JComboBox<String> threadCombo;
     private static ThreadManager tm;
+    private int threads;
 
     public void initialise() throws IOException
     {
-        tm = new ThreadManager(2);
+        threads = 2;
+        tm = null;
         gameList = new GameList();
         radioPane = new JPanel();
         checkPane = new JPanel();
@@ -168,7 +172,7 @@ public class MainWindow extends JPanel implements ActionListener
         threadCombo.setSelectedIndex(1);
         threadCombo.setMaximumSize(new Dimension(40, 40));
         threadCombo.setMinimumSize(new Dimension(40, 40));
-        threadCombo.addActionListener(this);
+        threadCombo.addItemListener(this);
 
         JLabel text = new JLabel("Use ", SwingConstants.RIGHT);
         text.setMaximumSize(new Dimension(40, 40));
@@ -333,7 +337,7 @@ public class MainWindow extends JPanel implements ActionListener
                     @Override
                     public void run()
                     {
-                        Download dS = new Download(statusLabel, tm);
+                        Download dS = new Download(statusLabel, tm, threads);
 
                         try {
                             dS.download(gameList);
@@ -345,5 +349,11 @@ public class MainWindow extends JPanel implements ActionListener
                 }.start();
             break;
         }
+    }
+
+    @Override
+    public void itemStateChanged(ItemEvent e)
+    {
+        threads = threadCombo.getSelectedIndex() + 1;
     }
 }

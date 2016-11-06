@@ -73,12 +73,17 @@ public class ProcMon implements Runnable
         }
     }
 
+    public Process getProcess()//this method shouldn't exist, but it ill have to until we work out what all the exit codes mean
+    {
+        return _proc;
+    }
+
     public boolean isExitError()
     {
         ExitCode exit = getExitCode();
         if(exit != ExitCode.SUCCESS)
-            return false;
-        return true;
+            return true;
+        return false;
     }
 
     public void destroy()

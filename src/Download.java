@@ -23,10 +23,12 @@ public class Download
 {
     public JTextArea statusLabel;
     ThreadManager tm;
-    public Download(JTextArea statusLabel, ThreadManager tm)
+
+    public Download(JTextArea statusLabel, ThreadManager tm, int threads)
     {
         this.statusLabel = statusLabel;
         this.tm = tm;
+        this.tm = new ThreadManager(threads);
     }
 
     private static void copyFile(String pathIn, String pathOut, boolean bDeleteOnExit) throws IOException

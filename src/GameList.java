@@ -67,7 +67,6 @@ public class GameList
                 }
             }
         }
-        selectedList.add(new Game ("test", 0, "1337"));
     }
 
     public ArrayList<Game> getList()
