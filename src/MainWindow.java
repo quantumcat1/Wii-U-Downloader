@@ -42,8 +42,10 @@ public class MainWindow extends JPanel implements ActionListener
     private JRadioButton sizeDownRadio;
     private JRadioButton sizeUpRadio;
     private JCheckBox updatesCheck;
+    private JCheckBox gameCheck;
     public JTextArea statusLabel;
     private JPanel buttonPane;
+    private JPanel checkPane;
     private static ThreadManager tm;
 
     public void initialise() throws IOException
@@ -51,8 +53,10 @@ public class MainWindow extends JPanel implements ActionListener
         tm = new ThreadManager(2);
         gameList = new GameList();
         buttonPane = new JPanel();
+        checkPane = new JPanel();
 
         buttonPane.setLayout(new BoxLayout(buttonPane, BoxLayout.LINE_AXIS));
+        checkPane.setLayout(new BoxLayout(checkPane, BoxLayout.LINE_AXIS));
 
         statusLabel = new JTextArea();
         statusLabel.setMaximumSize(new Dimension(500, 100));
@@ -122,8 +126,6 @@ public class MainWindow extends JPanel implements ActionListener
         bg.add(sizeDownRadio);
         bg.add(sizeUpRadio);
 
-
-
         alphabeticalRadio.addActionListener(this);
         sizeDownRadio.addActionListener(this);
         sizeUpRadio.addActionListener(this);
@@ -134,20 +136,30 @@ public class MainWindow extends JPanel implements ActionListener
         buttonPane.add(sizeDownRadio);
         buttonPane.add(sizeUpRadio);
 
-
         add(buttonPane);
 
         updatesCheck = new JCheckBox("updates");
         updatesCheck.setActionCommand("updates");
-        updatesCheck.setText("Also get updates?");
+        updatesCheck.setText("Get update?");
         updatesCheck.addActionListener(this);
-        add(updatesCheck);
+
+        checkPane.add(updatesCheck);
+
+        gameCheck = new JCheckBox("game");
+        gameCheck.setActionCommand("game");
+        gameCheck.setText("Get game?");
+        gameCheck.addActionListener(this);
+
+        checkPane.add(gameCheck);
+
+        add(checkPane);
 
         btnGo = new JButton("Download");
         btnGo.setActionCommand("go");
         btnGo.addActionListener(this);
         btnGo.setMaximumSize(new Dimension(100, 40));
         btnGo.setMinimumSize(new Dimension(100, 40));
+        btnGo.setAlignmentX(Component.CENTER_ALIGNMENT);
         add(btnGo);
 
         add(new JScrollPane(statusLabel));
@@ -281,6 +293,9 @@ public class MainWindow extends JPanel implements ActionListener
                 break;
             case "updates":
                 gameList.setUpdates(updatesCheck.isEnabled());
+                break;
+            case "game":
+                //gameList.setGame(gameCheck.isEnabled());
                 break;
             case "go":
                 new Thread()
