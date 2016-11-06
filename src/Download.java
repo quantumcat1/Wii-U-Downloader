@@ -17,6 +17,8 @@ import java.util.zip.ZipInputStream;
 
 import javax.swing.JTextArea;
 
+import org.apache.commons.io.FileUtils;
+
 public class Download
 {
     public JTextArea statusLabel;
@@ -32,7 +34,7 @@ public class Download
         File infile = new File(pathIn);
         File outfile = new File(pathOut);
 
-        if(infile.isDirectory())
+        if(infile.isDirectory() && !outfile.isDirectory())
         {
             File[] files = infile.listFiles();
             for(File f : files)
@@ -40,35 +42,36 @@ public class Download
                 copyFile(f.getPath().toString(), pathOut, bDeleteOnExit);
             }
         }
-
-        if(outfile.isDirectory())
+        else if(!infile.isDirectory() && outfile.isDirectory())
         {
-            File[] files = outfile.listFiles();
-            for(File f : files)
+            copyFile(pathIn, pathOut + "/" + infile.getName(), bDeleteOnExit);
+        }
+        else if(infile.isDirectory() && outfile.isDirectory())
+        {
+            FileUtils.copyDirectory(infile, outfile);
+        }
+        else if(!infile.isDirectory() && !outfile.isDirectory())
+        {
+            if(bDeleteOnExit)
             {
-                copyFile(pathIn, f.getPath().toString(), bDeleteOnExit);
+                outfile.deleteOnExit();
             }
+
+            FileInputStream instream = new FileInputStream(infile);
+            FileOutputStream outstream = new FileOutputStream(outfile);
+
+            byte[] buffer = new byte[1024];
+
+            int length;
+
+            while ((length = instream.read(buffer)) > 0)
+            {
+                outstream.write(buffer, 0, length);
+            }
+
+            instream.close();
+            outstream.close();
         }
-
-        if(bDeleteOnExit)
-        {
-            outfile.deleteOnExit();
-        }
-
-        FileInputStream instream = new FileInputStream(infile);
-        FileOutputStream outstream = new FileOutputStream(outfile);
-
-        byte[] buffer = new byte[1024];
-
-        int length;
-
-        while ((length = instream.read(buffer)) > 0)
-        {
-            outstream.write(buffer, 0, length);
-        }
-
-        instream.close();
-        outstream.close();
     }
 
     private void extractZip(String zip) throws IOException
@@ -112,8 +115,7 @@ public class Download
         }
     }
 
-    public void download(GameList gameList) throws IOException //throws IOException, InterruptedException
-, InterruptedException
+    public void download(GameList gameList) throws IOException, InterruptedException
     {
         //move nusgrabber into temp folder
         extractZip("Nusgrabber.zip");
@@ -180,8 +182,11 @@ public class Download
                         {
                             f.mkdir();
                         }
-
-                        copyFile("./tickets/" + game.getTitle() + "/" + game.getId() + "/title.tik", "./" + game.getId() + "/title.tik", false);
+                        f = new File("./tickets/" + game.getTitle() + "/" + game.getId() + "/");
+                        if(f.exists())
+                        {
+                            copyFile("./tickets/" + game.getTitle() + "/" + game.getId() + "/title.tik", "./" + game.getId() + "/title.tik", false);
+                        }
                         copyFile("./" + game.getId() + "/", "./install/" + game.getTitle() + "/", false);
                         deleteDirectory(new File("./" + game.getId() + "/"));
                     }
