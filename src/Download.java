@@ -16,6 +16,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.io.FileUtils;
 
@@ -139,19 +140,42 @@ public class Download
         //now to download the games
         for(Game game : gameList.getSelectedList())
         {
+            String thing = "";
             if(gameList.isGame())
             {
-                tm.add(game);
+                tm.add(game, statusLabel);
                 //hopefully mark the id folder as delete on exit
                 f = new File("./" + game.getId() + "/");
                 f.deleteOnExit();
+                thing = game.getTitle();
             }
             if(gameList.isUpdates())
             {
-                tm.add(game.update());
+                tm.add(game.update(), statusLabel);
               //hopefully mark the id folder as delete on exit
                 f = new File("./" + game.update().getId() + "/");
                 f.deleteOnExit();
+                if(gameList.isGame())
+                {
+                    thing += " and ";
+                }
+                thing += game.update().getTitle();
+            }
+            if(!thing.equals(""))
+            {
+                thing += " added to queue\n";
+            }
+            final String final_thing = thing;
+            if(!thing.equals(""))
+            {
+                SwingUtilities.invokeLater(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        statusLabel.append(final_thing);
+                    }
+                });
             }
         }
 
@@ -192,32 +216,47 @@ public class Download
                             copyFile("./tickets/" + game.getTitle() + "/" + game.getId() + "/title.tik", "./" + game.getId() + "/title.tik", false);
                         }
                         copyFile("./" + game.getId() + "/", "./install/" + game.getTitle() + "/", false);
+                        SwingUtilities.invokeLater(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                statusLabel.append(game.getTitle() + " finished\n");
+                            }
+                        });
+                    }
+                    else
+                    {
+                        SwingUtilities.invokeLater(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                statusLabel.append(game.getTitle() + " finished with errors (please check separate log window for exit code)\n");
+                            }
+                        });
                     }
                 }
             }
         }
-        deleteIdFolders();
-        deleteDirectory(new File("./temp/"));
-        deleteDirectory(new File("./NUSgrabber.exe"));
-        deleteDirectory(new File("./vcruntime140.dll"));
-        deleteDirectory(new File("./wget.exe"));
+        deleteTempFolders();
+
     }
 
-    public void deleteIdFolders()
+    public void deleteTempFolders()
     {
         for(Game game : gameList.getSelectedList())
         {
             File f = new File ("./" + game.getId() + "/");
             File f2 = new File ("./" + game.update().getId() + "/");
-            if(gameList.isGame())
-            {
-                deleteDirectory(f);
-            }
-            if(gameList.isUpdates())
-            {
-                deleteDirectory(f2);
-            }
+
+            deleteDirectory(f);
+            deleteDirectory(f2);
         }
+        deleteDirectory(new File("./temp/"));
+        deleteDirectory(new File("./NUSgrabber.exe"));
+        deleteDirectory(new File("./vcruntime140.dll"));
+        deleteDirectory(new File("./wget.exe"));
     }
 
     private boolean deleteDirectory(File directory)
@@ -227,17 +266,17 @@ public class Download
             File[] files = directory.listFiles();
             if (null != files)
             {
-                for (int i = 0; i < files.length; i++)
+                for (File file : files)
                 {
-                    if (files[i].isDirectory())
+                    if (file.isDirectory())
                     {
-                        deleteDirectory(files[i]);
-                        System.out.println("deleting " + files[i].getName());
+                        deleteDirectory(file);
+                        System.out.println("deleting " + file.getName());
                     }
                     else
                     {
-                        files[i].delete();
-                        System.out.println("deleting " + files[i].getName());
+                        file.delete();
+                        System.out.println("deleting " + file.getName());
                     }
                 }
             }

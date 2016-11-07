@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.swing.JTextArea;
+
 public class ThreadManager
 {
     private ExecutorService executor;
@@ -15,9 +17,9 @@ public class ThreadManager
         executor = Executors.newFixedThreadPool(numThreads);
     }
 
-    public boolean add(Game game)
+    public boolean add(Game game, JTextArea originalStatusLabel)
     {
-        DownloadThread dt = new DownloadThread(game);
+        DownloadThread dt = new DownloadThread(game, originalStatusLabel);
         executor.execute(dt);
         futures.put(game, dt);
         return true;

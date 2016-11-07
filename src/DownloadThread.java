@@ -18,13 +18,15 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, String> //Thre
     private ProcMon procMon = null;
     private InputStream is;
     private JTextArea statusLabel = null;
+    private JTextArea originalStatusLabel = null;
     private List<String> textContents;
     private Game game;
 
-    DownloadThread(Game game)//, JTextArea statusLabel)
+    DownloadThread(Game game, JTextArea originalStatusLabel)
     {
         this.game = game;
         textContents = new ArrayList<String>();
+        this.originalStatusLabel = originalStatusLabel;
     }
 
     public ProcMon.ExitCode doInBackground()
@@ -54,6 +56,7 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, String> //Thre
                 cancel(true);
             }
             procMon = ProcMon.create(process);
+            originalStatusLabel.append(game.getTitle() + " starting\n");
         }
         while((!procMon.isComplete() && exit == ProcMon.ExitCode.RUNNING) || exit == ProcMon.ExitCode.NULL)
         {

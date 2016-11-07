@@ -301,7 +301,7 @@ public class MainWindow extends JPanel implements ActionListener, ItemListener
                     }
                     if(download != null)
                     {
-                        download.deleteIdFolders();//change this to delete all temp stuff
+                        download.deleteTempFolders();
                     }
                     System.exit(0);
                 }
