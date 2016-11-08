@@ -52,14 +52,12 @@ public class MainWindow extends JPanel implements ActionListener, ItemListener
     private JPanel checkPane;
     private JPanel downloadPane;
     private JComboBox<String> threadCombo;
-    private static ThreadManager tm;
     private int threads;
     private static Download download;
 
     public void initialise() throws IOException
     {
         threads = 2;
-        tm = null;
         gameList = new GameList();
         radioPane = new JPanel();
         checkPane = new JPanel();
@@ -295,13 +293,10 @@ public class MainWindow extends JPanel implements ActionListener, ItemListener
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
                 {
-                    if(tm != null)
-                    {
-                        tm.cancel();
-                    }
                     if(download != null)
                     {
-                        download.deleteTempFolders();
+                        download.cancel();
+                        download.cleanUp();
                     }
                     System.exit(0);
                 }
@@ -346,7 +341,7 @@ public class MainWindow extends JPanel implements ActionListener, ItemListener
                     @Override
                     public void run()
                     {
-                        download = new Download(statusLabel, tm, threads, gameList);
+                        download = new Download(statusLabel, threads, gameList);
 
                         try {
                             download.download();

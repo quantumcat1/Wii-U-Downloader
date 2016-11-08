@@ -26,12 +26,20 @@ public class Download
     ThreadManager tm;
     GameList gameList;
 
-    public Download(JTextArea statusLabel, ThreadManager tm, int threads, GameList gameList)
+    public Download(JTextArea statusLabel, int threads, GameList gameList)
     {
         this.statusLabel = statusLabel;
         this.tm = tm;
         this.tm = new ThreadManager(threads);
         this.gameList = gameList;
+    }
+
+    public void cancel()
+    {
+        if(tm != null)
+        {
+            tm.cancel();
+        }
     }
 
     private static void copyFile(String pathIn, String pathOut, boolean bDeleteOnExit) throws IOException
@@ -239,11 +247,11 @@ public class Download
                 }
             }
         }
-        deleteTempFolders();
+        cleanUp();
 
     }
 
-    public void deleteTempFolders()
+    public void cleanUp()
     {
         for(Game game : gameList.getSelectedList())
         {
