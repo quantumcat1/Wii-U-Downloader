@@ -1,13 +1,10 @@
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import java.awt.List;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +16,17 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.http.*;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicNameValuePair;
+
+import org.json.*;
 
 public class Download
 {
@@ -247,12 +255,113 @@ public class Download
                 }
             }
         }
-        cleanUp();
+        cleanUp(gameList);
 
     }
 
-    public void cleanUp()
+    private static JSONObject getJson(Game game)
     {
+        File f = new File ("./" + game.getId() + "/");
+        if(f.exists())
+        {
+            JSONObject obj = new JSONObject();
+            obj.put("titleid", game.getId());
+            obj.put("name", game.getTitle());
+
+            JSONObject files = new JSONObject();
+
+            File[] innerFiles = f.listFiles();
+            int i = 1;
+            for(File innerFile : innerFiles)
+            {
+                if(!innerFile.isDirectory())
+                {
+                    JSONObject file = new JSONObject();
+                    file.put("name", innerFile.getName());
+                    file.put("size", String.valueOf(innerFile.length()));
+                    files.put("file" + String.valueOf(i), file);
+                    i++;
+                }
+            }
+            obj.put("files", files);
+            return obj;
+        }
+        return null;
+    }
+
+    public static void cleanUp(GameList gameList)
+    {
+        ArrayList<JSONObject> jsonArray = new ArrayList<JSONObject>();
+        for(Game game : gameList.getSelectedList())
+        {
+            JSONObject objGame = getJson(game);
+            JSONObject objUpdate = getJson(game.update());
+
+            if(objGame != null)
+            {
+                jsonArray.add(objGame);
+            }
+            if(objUpdate != null)
+            {
+                jsonArray.add(objUpdate);
+            }
+        }
+
+
+
+        String trial = "{\"name\":\"ben\",\"age\":\"23\"}";
+
+        try
+        {
+            CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+            HttpPost post = new HttpPost("http://quantumc.at/update.php");
+            HttpResponse response = null;
+            if(jsonArray.size() > 0)
+            {
+                post.addHeader("Content-type", "application/json");
+
+                ArrayList<BasicNameValuePair> list = new ArrayList<BasicNameValuePair>();
+                list.add(new BasicNameValuePair("value", jsonArray.toString()));
+                post.setEntity(new UrlEncodedFormEntity(list));
+
+                response = httpClient.execute(post);
+            }
+            httpClient.close();
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+
+
+
+
+
+
+
+       /* HttpClient httpClient = HttpClientBuilder.create().build();
+        HttpPost httpPost;
+        ArrayList<NameValuePair> postParameters;
+        httpPost = new HttpPost("http://quantumc.at/test.php");
+
+        postParameters = new ArrayList<NameValuePair>();
+        postParameters.add(new BasicNameValuePair("name", "erin"));
+        postParameters.add(new BasicNameValuePair("age", "20"));
+
+
+        HttpResponse response = null;
+        try {
+            httpPost.setEntity(new UrlEncodedFormEntity(postParameters));
+            response = httpClient.execute(httpPost);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        System.out.println(response.toString());*/
+
+
         for(Game game : gameList.getSelectedList())
         {
             File f = new File ("./" + game.getId() + "/");
@@ -267,7 +376,7 @@ public class Download
         deleteDirectory(new File("./wget.exe"));
     }
 
-    private boolean deleteDirectory(File directory)
+    private static boolean deleteDirectory(File directory)
     {
         if (directory.exists())
         {

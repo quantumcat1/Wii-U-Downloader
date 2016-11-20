@@ -41,7 +41,7 @@ public class MainWindow extends JPanel implements ActionListener, ItemListener
     private JTable gameTable;
     private JButton btnGo;
     private JTextArea descLabel;
-    private GameList gameList;
+    private static GameList gameList;
     private JRadioButton alphabeticalRadio;
     private JRadioButton sizeDownRadio;
     private JRadioButton sizeUpRadio;
@@ -100,6 +100,7 @@ public class MainWindow extends JPanel implements ActionListener, ItemListener
             {
                 gameList.setSelection(gameTable.getSelectedRows());
                 update();
+                Download.cleanUp(gameList);
             }
         });
 
@@ -296,7 +297,7 @@ public class MainWindow extends JPanel implements ActionListener, ItemListener
                     if(download != null)
                     {
                         download.cancel();
-                        download.cleanUp();
+                        download.cleanUp(gameList);
                     }
                     System.exit(0);
                 }
