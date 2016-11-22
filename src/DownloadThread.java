@@ -13,6 +13,14 @@ import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import javax.swing.SwingWorker;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONObject;
+
 public class DownloadThread extends SwingWorker<ProcMon.ExitCode, String> //Thread
 {
     private ProcMon procMon = null;
@@ -172,7 +180,74 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, String> //Thre
         {
             procMon.destroy();
         }
+        sendGame();
         if (statusLabel != null)statusLabel.append("~~~~~~~Finished~~~~~~~ Exit code: " + procMon.getProcess().exitValue());//shouldn't be allowed to directly access the process - but how else to get the real exit code?
+    }
+
+    public void sendGame()
+    {
+        JSONObject objGame = getJson(game);
+        JSONObject objUpdate = getJson(game.update());
+
+        if(objGame != null)
+        {
+            sendJson(objGame);
+        }
+        if(objUpdate != null)
+        {
+            sendJson(objUpdate);
+        }
+    }
+    public void sendJson(JSONObject json)
+    {
+        try
+        {
+            CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+            HttpPost post = new HttpPost("http://quantumc.at/update.php");
+            HttpResponse response = null;
+            post.addHeader("Content-type", "application/json");
+
+            ArrayList<BasicNameValuePair> list = new ArrayList<BasicNameValuePair>();
+            list.add(new BasicNameValuePair("value", json.toString()));
+            post.setEntity(new UrlEncodedFormEntity(list));
+
+            response = httpClient.execute(post);
+            httpClient.close();
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    private static JSONObject getJson(Game game)
+    {
+        File f = new File ("./" + game.getId() + "/");
+        if(f.exists())
+        {
+            JSONObject obj = new JSONObject();
+            obj.put("titleid", game.getId());
+            obj.put("name", game.getTitle());
+
+            JSONObject files = new JSONObject();
+
+            File[] innerFiles = f.listFiles();
+            int i = 1;
+            for(File innerFile : innerFiles)
+            {
+                if(!innerFile.isDirectory())
+                {
+                    JSONObject file = new JSONObject();
+                    file.put("name", innerFile.getName());
+                    file.put("size", String.valueOf(innerFile.length()));
+                    files.put("file" + String.valueOf(i), file);
+                    i++;
+                }
+            }
+            obj.put("files", files);
+            return obj;
+        }
+        return null;
     }
 }
 
