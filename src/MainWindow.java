@@ -209,11 +209,7 @@ public class MainWindow extends JPanel implements ActionListener, ItemListener
         dtm.setColumnIdentifiers(header);
         for(Game game : gameList.getList())
         {
-            String sizeColumn = Integer.toString(game.getSize()) + "MB";
-            if(sizeColumn.equals("0MB"))
-            {
-                sizeColumn = "?";
-            }
+            String sizeColumn = game.getSizeStr();
             dtm.addRow(new Object[]{game.getTitle(), sizeColumn});
         }
         gameTable.setModel(dtm);

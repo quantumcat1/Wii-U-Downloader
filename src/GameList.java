@@ -4,9 +4,19 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class GameList
 {
@@ -24,6 +34,33 @@ public class GameList
         setList();
     }
 
+    private String convertSize(int size)
+    {
+        String r_size = size + " B";
+        float gb = size/1073741824;
+        if(gb < 1)
+        {
+            float mb = size/1048576;
+            if(mb < 1)
+            {
+                float kb = size/1024;
+                if(kb > 1)
+                {
+                    r_size = String.format("%.2f", kb) + " KB";
+                }
+            }
+            else
+            {
+                r_size = String.format("%.2f", mb) + " MB";
+            }
+        }
+        else
+        {
+            r_size = String.format("%.2f", gb) + " GB";
+        }
+        return r_size;
+    }
+
     private void setList() throws IOException
     {
         list.clear();
@@ -36,7 +73,6 @@ public class GameList
             {
                 File[] innerFiles = file.listFiles();
                 int numDirectories = 0;
-                int size = 0;
                 String id = "";
                 for(File innerFile : innerFiles)
                 {
@@ -45,28 +81,63 @@ public class GameList
                         numDirectories += 1;
                         id = innerFile.getName();
                     }
-                    else if (innerFile.getName().equals("size.txt"))
-                    {
-                        BufferedReader br = new BufferedReader(new FileReader(innerFile));
-                        String data = br.readLine();
-                        try
-                        {
-                            size = Integer.parseInt(data);
-                        }
-                        catch (NumberFormatException e)
-                        {
-                            System.out.println("game = " + innerFile.getName() + " size = " + data);
-                            e.printStackTrace();
-                        }
-                        br.close();
-                    }
                 }
                 if(numDirectories > 0)
                 {
-                    list.add(new Game(file.getName(), size, id));
+                    list.add(new Game(file.getName(), 0, "?", id));
                 }
             }
         }
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        HttpPost post = new HttpPost("http://quantumc.at/getGameSize.php");
+        post.addHeader("Content-type", "application/json");
+        HttpResponse response = null;
+        String responseString = "";
+        boolean connected = true;
+        try
+        {
+            response = httpClient.execute(post);
+            HttpEntity entity = response.getEntity();
+            responseString = EntityUtils.toString(entity, "UTF-8");
+        }
+        catch (Exception e)
+        {
+            connected = false;
+            e.printStackTrace();
+        }
+        if(connected)
+        {
+            JSONArray arr = new JSONArray(responseString);
+            httpClient.close();
+
+            for(int i = 0; i < arr.length(); i ++)
+            {
+                JSONObject obj = arr.getJSONObject(i);
+                Game game = getById(obj.getString("titleid"));
+                if(game != null)
+                {
+                    game.setSizeStr(obj.getString("size_str"));
+                    game.setSize(obj.getInt("size"));
+                }
+                else
+                {
+                    game = new Game(obj.getString("name"), obj.getInt("size"), obj.getString("size_str"), obj.getString("titleid"));
+                    list.add(game);
+                }
+            }
+        }
+    }
+
+    public Game getById(String id)
+    {
+        for(Game game : list)
+        {
+            if(game.getId() == id)
+            {
+                return game;
+            }
+        }
+        return null;
     }
 
     public ArrayList<Game> getList()

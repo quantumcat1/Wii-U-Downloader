@@ -3,6 +3,7 @@ public class Game
 {
     private String title;
     private int size;
+    private String size_str;
     private String id;
 
     public Game()
@@ -29,6 +30,13 @@ public class Game
         this.size = size;
         this.id = id;
     }
+    public Game (String title, int size, String size_str, String id)
+    {
+        this.title = title;
+        this.size = size;
+        this.size_str = size_str;
+        this.id = id;
+    }
 
     public String getTitle()
     {
@@ -38,6 +46,21 @@ public class Game
     public int getSize()
     {
         return size;
+    }
+
+    public void setSize(int size)
+    {
+        this.size = size;
+    }
+
+    public void setSizeStr(String size_str)
+    {
+        this.size_str = size_str;
+    }
+
+    public String getSizeStr()
+    {
+        return size_str;
     }
 
     public String getId()
