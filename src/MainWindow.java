@@ -59,6 +59,7 @@ public class MainWindow extends JPanel implements ActionListener, ItemListener
     {
         threads = 2;
         gameList = new GameList();
+        gameList.sortList(GameList.Sort.ALPHA);
         radioPane = new JPanel();
         checkPane = new JPanel();
         downloadPane = new JPanel();
@@ -215,8 +216,8 @@ public class MainWindow extends JPanel implements ActionListener, ItemListener
         gameTable.setModel(dtm);
     }
 
-    private void update() {
-
+    private void update()
+    {
         adjustJTableRowSizes(gameTable);
         for (int i = 0; i < gameTable.getColumnCount(); i++) {
             adjustColumnSizes(gameTable, i, 2);

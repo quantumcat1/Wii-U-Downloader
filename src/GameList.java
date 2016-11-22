@@ -97,8 +97,7 @@ public class GameList
         try
         {
             response = httpClient.execute(post);
-            HttpEntity entity = response.getEntity();
-            responseString = EntityUtils.toString(entity, "UTF-8");
+            responseString = EntityUtils.toString(response.getEntity());
         }
         catch (Exception e)
         {
@@ -121,8 +120,7 @@ public class GameList
                 }
                 else
                 {
-                    game = new Game(obj.getString("name"), obj.getInt("size"), obj.getString("size_str"), obj.getString("titleid"));
-                    list.add(game);
+                    list.add(new Game(obj.getString("name"), obj.getInt("size"), obj.getString("size_str"), obj.getString("titleid")));
                 }
             }
         }
