@@ -1,5 +1,6 @@
 
 import java.awt.Dimension;
+import java.awt.Window;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingWorker;
 
@@ -66,6 +68,7 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, FileProgress>
             procMon = ProcMon.create(process);
             originalStatusLabel.append(game.getTitle() + " starting\n");
         }
+        FileProgress fp = new FileProgress();
         while((!procMon.isComplete() && exit == ProcMon.ExitCode.RUNNING) || exit == ProcMon.ExitCode.NULL)
         {
             try
@@ -73,7 +76,7 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, FileProgress>
                 int i = 0;
                 final StringBuilder s = new StringBuilder();
                 i = is.read();
-                FileProgress fp = new FileProgress();
+
                 while(i != -1 && exit == ProcMon.ExitCode.RUNNING)
                 {
                     s.append((char)i);
@@ -89,7 +92,7 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, FileProgress>
                             }
                             String line = s.toString();
                             line = line.substring(line.lastIndexOf(fileExt) - 8, line.lastIndexOf(fileExt) + fileExt.length());
-                            fp.setName(line);
+                            if (!line.equals("")) fp.setName(line);
                         }
                         //else if(s.toString().contains("10%") || s.toString().contains("20%") || s.toString().contains("30%") || s.toString().contains("40%") || s.toString().contains("50%") || s.toString().contains("60%") || s.toString().contains("70%") || s.toString().contains("80%") || s.toString().contains("90%"))
                         if(s.toString().contains("%"))
@@ -101,7 +104,7 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, FileProgress>
                             {
                                 line = line.substring(1);
                             }
-                            if(line != "") fp.setProgress(Integer.parseInt(line));
+                            if(!line.equals("") && !line.equals("0")) fp.setProgress(Integer.parseInt(line));
                         }
                         s.setLength(0);
                         publish(fp);
@@ -129,10 +132,13 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, FileProgress>
             //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setPreferredSize(new Dimension(400, 600));
 
+
             window = new StatusWindow();
             window.setLayout(new BoxLayout(window, BoxLayout.PAGE_AXIS));
             window.setOpaque(true);
-            frame.setContentPane(window);
+            JScrollPane scroll = new JScrollPane(window);
+            //frame.setContentPane(window);
+            frame.setContentPane(scroll);
 
             frame.setLocationRelativeTo(null);
             frame.pack();
@@ -141,14 +147,15 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, FileProgress>
         //for(String s : chunks)
         for(FileProgress fp : chunks)
         {
+            if(fp.getName().equals("")) continue;
             ProgressPanel pp = window.getPanel(fp.getName());
             if(pp == null)
             {
                 pp = window.addNew(fp.getName());
-                window.getParent().revalidate();
+                /*window.getParent().revalidate();
                 window.getParent().repaint();
                 window.revalidate();
-                window.repaint();
+                window.repaint();*/
             }
             pp.setName(fp.getName());
             pp.addProgress(fp.getProgress());
@@ -196,7 +203,8 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, FileProgress>
         }
         sendGame();
         //if (statusLabel != null)statusLabel.append("~~~~~~~Finished~~~~~~~ Exit code: " + procMon.getProcess().exitValue());//shouldn't be allowed to directly access the process - but how else to get the real exit code?
-        if(window.getParent() != null) window.getParent().setVisible(false);
+        //if(window.getParent().getParent() != null) window.getParent().getParent().setVisible(false);
+        if(window.getParent() != null) ((Window) window.getParent()).dispose();
     }
 
     public void sendGame()

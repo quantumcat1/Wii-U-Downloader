@@ -3,15 +3,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.Scrollable;
 
-public class StatusWindow extends JPanel
+public class StatusWindow extends JPanel //simplements Scrollable
 {
     private static final long serialVersionUID = 3136350037469268319L;
     List<ProgressPanel> progressPanels;
+    JScrollPane scrollPane;
     public void initialise()
     {
+        //scrollPane = new JScrollPane();
+        //add(scrollPane);
         progressPanels = new ArrayList<ProgressPanel>();
     }
 
@@ -24,7 +29,10 @@ public class StatusWindow extends JPanel
     {
         ProgressPanel pp = new ProgressPanel(name);
         progressPanels.add(pp);
+        //scrollPane.add(pp.getPanel());
         add(pp.getPanel());
+        revalidate();
+        repaint();
         return pp;
     }
 

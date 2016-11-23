@@ -54,6 +54,8 @@ public class Download
         File infile = new File(pathIn);
         File outfile = new File(pathOut);
 
+        if(!infile.exists()) return;
+
         if(infile.isDirectory() && !outfile.isDirectory())
         {
             File[] files = infile.listFiles();
