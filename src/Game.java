@@ -1,74 +1,129 @@
 
 public class Game
 {
-    private String title;
-    private int size;
-    private String size_str;
-    private String id;
+    private GameVO game;
+    private GameVO update;
 
-    public Game()
+    public Game(String title, String id)
     {
-        title = "";
-        size = 0;
-        id = "";
-    }
-    public Game (String title)
-    {
-        this.title = title;
-        size = 0;
-        id = "";
-    }
-    public Game (String title, int size)
-    {
-        this.title = title;
-        this.size = size;
-        id = "";
-    }
-    public Game (String title, int size, String id)
-    {
-        this.title = title;
-        this.size = size;
-        this.id = id;
-    }
-    public Game (String title, int size, String size_str, String id)
-    {
-        this.title = title;
-        this.size = size;
-        this.size_str = size_str;
-        this.id = id;
+        if(id.contains("0005000E"))
+        {
+            game = new GameVO(title, id.replaceAll("0005000E", "00050000"));
+            update = new GameVO(title + " Update", id);
+        }
+        else
+        {
+            game = new GameVO(title, id);
+            update = new GameVO(title + " Update", id.replaceAll("00050000", "0005000E"));
+        }
     }
 
-    public String getTitle()
+    public Game(String title, String id, int size)
     {
-        return title;
+        title.replaceAll(" Update", "");
+        if(id.contains("0005000E"))
+        {
+            game = new GameVO(title, id.replaceAll("0005000E", "00050000"), size);
+            update = new GameVO(title + " Update", id, size);
+        }
+        else
+        {
+            game = new GameVO(title, id, size);
+            update = new GameVO(title + " Update", id.replaceAll("00050000", "0005000E"), size);
+        }
     }
 
-    public int getSize()
+    public void setGameSize(int size)
     {
-        return size;
+        game.setSize(size);
     }
 
-    public void setSize(int size)
+    public void setUpdateSize(int size)
     {
-        this.size = size;
+        update.setSize(size);
     }
 
-    public void setSizeStr(String size_str)
+    public void setSize(String id, int size)
     {
-        this.size_str = size_str;
+        if(id.contains("0005000E"))
+        {
+            update.setSize(size);
+        }
+        else
+        {
+            game.setSize(size);
+        }
     }
 
-    public String getSizeStr()
+    public int getGameSize()
     {
-        return size_str;
+        return game.getSize();
     }
 
-    public String getId()
+    public int getUpdateSize()
     {
-        return id;
+        return update.getSize();
     }
-    public Game update()
+
+    public String getGameSizeStr()
     {
-        return new Game(title + " Update", this.size, id.replaceAll("00050000", "0005000E"));
+        return game.getSizeStr();
+    }
+
+    public String getUpdateSizeStr()
+    {
+        return update.getSizeStr();
+    }
+
+    public String getGameId()
+    {
+        return game.getId();
+    }
+
+    public String getUpdateId()
+    {
+        return update.getId();
+    }
+
+    public void setTitle(String id, String title)
+    {
+        title = title.replaceAll(" Update", "");
+        if(id.contains("0005000E"))
+        {
+            update.setTitle(title + " Update");
+        }
+        else
+        {
+            game.setTitle(title);
+        }
+    }
+
+    public String getGameTitle()
+    {
+        return game.getTitle();
+    }
+
+    public String getUpdateTitle()
+    {
+        return update.getTitle();
+    }
+
+    public GameVO getGame()
+    {
+        return game;
+    }
+
+    public GameVO getUpdate()
+    {
+        return update;
+    }
+
+    public boolean isMatchId(String id)
+    {
+        if(game.getId().equals(id) || update.getId().equals(id))
+        {
+            return true;
+        }
+        return false;
     }
 }

@@ -9,15 +9,15 @@ import javax.swing.JTextArea;
 public class ThreadManager
 {
     private ExecutorService executor;
-    private Map <Game, DownloadThread> futures;
+    private Map <GameVO, DownloadThread> futures;
 
     public ThreadManager(int numThreads)
     {
-        futures = new HashMap <Game, DownloadThread>();
+        futures = new HashMap <GameVO, DownloadThread>();
         executor = Executors.newFixedThreadPool(numThreads);
     }
 
-    public boolean add(Game game, JTextArea originalStatusLabel)
+    public boolean add(GameVO game, JTextArea originalStatusLabel)
     {
         DownloadThread dt = new DownloadThread(game, originalStatusLabel);
         executor.execute(dt);
@@ -25,7 +25,7 @@ public class ThreadManager
         return true;
     }
 
-    public Map<Game, DownloadThread> getFutures()
+    public Map<GameVO, DownloadThread> getFutures()
     {
         return futures;
     }

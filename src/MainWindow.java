@@ -101,14 +101,13 @@ public class MainWindow extends JPanel implements ActionListener, ItemListener
             {
                 gameList.setSelection(gameTable.getSelectedRows());
                 update();
-                Download.cleanUp(gameList);
             }
         });
 
 
         gameTable.setFont(new Font(labelFont.getName(), Font.PLAIN, 16));
-        gameTable.setMaximumSize(new Dimension(500, 30));
-        gameTable.setMinimumSize(new Dimension(500, 30));
+        gameTable.setMaximumSize(new Dimension(600, 30));
+        gameTable.setMinimumSize(new Dimension(600, 30));
         gameTable.setRowSelectionAllowed(true);
         gameTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         gameTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -206,12 +205,13 @@ public class MainWindow extends JPanel implements ActionListener, ItemListener
     private void setTableRows()
     {
         DefaultTableModel dtm = new DefaultTableModel(0, 0);
-        String[] header = new String[]{"Name", "Size"};
+        String[] header = new String[]{"Name", "Game Size", "Update Size"};
         dtm.setColumnIdentifiers(header);
         for(Game game : gameList.getList())
         {
-            String sizeColumn = game.getSizeStr();
-            dtm.addRow(new Object[]{game.getTitle(), sizeColumn});
+            String gameSizeColumn = game.getGameSizeStr();
+            String updateSizeColumn = game.getUpdateSizeStr();
+            dtm.addRow(new Object[]{game.getGameTitle(), gameSizeColumn, updateSizeColumn});
         }
         gameTable.setModel(dtm);
     }
@@ -219,14 +219,16 @@ public class MainWindow extends JPanel implements ActionListener, ItemListener
     private void update()
     {
         adjustJTableRowSizes(gameTable);
-        for (int i = 0; i < gameTable.getColumnCount(); i++) {
+        for (int i = 0; i < gameTable.getColumnCount(); i++)
+        {
             adjustColumnSizes(gameTable, i, 2);
         }
     }
     private void adjustJTableRowSizes(JTable jTable) {
         for (int row = 0; row < jTable.getRowCount(); row++) {
             int maxHeight = 0;
-            for (int column = 0; column < jTable.getColumnCount(); column++) {
+            for (int column = 0; column < jTable.getColumnCount(); column++)
+            {
                 TableCellRenderer cellRenderer = jTable.getCellRenderer(row, column);
                 Object valueAt = jTable.getValueAt(row, column);
                 Component tableCellRendererComponent = cellRenderer.getTableCellRendererComponent(jTable, valueAt, false, false, row, column);
@@ -237,19 +239,22 @@ public class MainWindow extends JPanel implements ActionListener, ItemListener
         }
 
     }
-    public void adjustColumnSizes(JTable table, int column, int margin) {
+    public void adjustColumnSizes(JTable table, int column, int margin)
+    {
         DefaultTableColumnModel colModel = (DefaultTableColumnModel) table.getColumnModel();
         TableColumn col = colModel.getColumn(column);
         int width;
 
         TableCellRenderer renderer = col.getHeaderRenderer();
-        if (renderer == null) {
+        if (renderer == null)
+        {
             renderer = table.getTableHeader().getDefaultRenderer();
         }
         Component comp = renderer.getTableCellRendererComponent(table, col.getHeaderValue(), false, false, 0, 0);
         width = comp.getPreferredSize().width;
 
-        for (int r = 0; r < table.getRowCount(); r++) {
+        for (int r = 0; r < table.getRowCount(); r++)
+        {
             renderer = table.getCellRenderer(r, column);
             comp = renderer.getTableCellRendererComponent(table, table.getValueAt(r, column), false, false, r, column);
             int currentWidth = comp.getPreferredSize().width;
@@ -271,7 +276,7 @@ public class MainWindow extends JPanel implements ActionListener, ItemListener
     {
         JFrame frame = new JFrame("Download games");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setPreferredSize(new Dimension(500, 800));
+        frame.setPreferredSize(new Dimension(600, 800));
 
         MainWindow newContentPane = new MainWindow();
         newContentPane.setLayout(new BoxLayout(newContentPane, BoxLayout.PAGE_AXIS));

@@ -34,32 +34,7 @@ public class GameList
         setList();
     }
 
-    private String convertSize(int size)
-    {
-        String r_size = size + " B";
-        float gb = size/1073741824;
-        if(gb < 1)
-        {
-            float mb = size/1048576;
-            if(mb < 1)
-            {
-                float kb = size/1024;
-                if(kb > 1)
-                {
-                    r_size = String.format("%.2f", kb) + " KB";
-                }
-            }
-            else
-            {
-                r_size = String.format("%.2f", mb) + " MB";
-            }
-        }
-        else
-        {
-            r_size = String.format("%.2f", gb) + " GB";
-        }
-        return r_size;
-    }
+
 
     private void setList() throws IOException
     {
@@ -84,7 +59,7 @@ public class GameList
                 }
                 if(numDirectories > 0)
                 {
-                    list.add(new Game(file.getName(), 0, "?", id));
+                    list.add(new Game(file.getName(), id));
                 }
             }
         }
@@ -115,12 +90,12 @@ public class GameList
                 Game game = getById(obj.getString("titleid"));
                 if(game != null)
                 {
-                    game.setSizeStr(obj.getString("size_str"));
-                    game.setSize(obj.getInt("size"));
+                    game.setSize(obj.getString("titleid"), obj.getInt("size"));
+                    game.setTitle(obj.getString("titleid"), obj.getString("name"));
                 }
                 else
                 {
-                    list.add(new Game(obj.getString("name"), obj.getInt("size"), obj.getString("size_str"), obj.getString("titleid")));
+                    list.add(new Game(obj.getString("name"), obj.getString("titleid"), obj.getInt("size")));
                 }
             }
         }
@@ -130,7 +105,7 @@ public class GameList
     {
         for(Game game : list)
         {
-            if(game.getId() == id)
+            if(game.isMatchId(id))
             {
                 return game;
             }
@@ -187,7 +162,7 @@ public class GameList
         int j = 0;
         for(Game g : selectedList)
         {
-            if(g.getTitle().equals(game.getTitle()))
+            if(game.isMatchId(g.getGameId()))
             {
                 selectedList.remove(j);
                 break;
@@ -219,7 +194,7 @@ public class GameList
             @Override
             public int compare(Game g1, Game g2)
             {
-                return g1.getTitle().compareTo(g2.getTitle());
+                return g1.getGameTitle().compareTo(g2.getGameTitle());
             }
         };
         return comp;
@@ -232,7 +207,7 @@ public class GameList
             @Override
             public int compare(Game g1, Game g2)
             {
-                return g1.getSize() - g2.getSize();
+                return g1.getGameSize() - g2.getGameSize();
             }
         };
         return comp;
@@ -245,7 +220,7 @@ public class GameList
             @Override
             public int compare(Game g1, Game g2)
             {
-                return g2.getSize() - g1.getSize();
+                return g2.getGameSize() - g1.getGameSize();
             }
         };
         return comp;

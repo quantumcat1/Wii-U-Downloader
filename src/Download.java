@@ -37,7 +37,6 @@ public class Download
     public Download(JTextArea statusLabel, int threads, GameList gameList)
     {
         this.statusLabel = statusLabel;
-        this.tm = tm;
         this.tm = new ThreadManager(threads);
         this.gameList = gameList;
     }
@@ -159,23 +158,17 @@ public class Download
             String thing = "";
             if(gameList.isGame())
             {
-                tm.add(game, statusLabel);
-                //hopefully mark the id folder as delete on exit
-                f = new File("./" + game.getId() + "/");
-                f.deleteOnExit();
-                thing = game.getTitle();
+                tm.add(game.getGame(), statusLabel);
+                thing = game.getGameTitle();
             }
             if(gameList.isUpdates())
             {
-                tm.add(game.update(), statusLabel);
-              //hopefully mark the id folder as delete on exit
-                f = new File("./" + game.update().getId() + "/");
-                f.deleteOnExit();
+                tm.add(game.getUpdate(), statusLabel);
                 if(gameList.isGame())
                 {
                     thing += " and ";
                 }
-                thing += game.update().getTitle();
+                thing += game.getUpdateTitle();
             }
             if(!thing.equals(""))
             {
@@ -195,22 +188,25 @@ public class Download
             }
         }
 
-        Map<Game, DownloadThread> completed = new HashMap<Game, DownloadThread>();
+        Map<GameVO, DownloadThread> completed = new HashMap<GameVO, DownloadThread>();
 
         while(completed.size() < tm.getFutures().size())
         {
-            for (Map.Entry<Game,DownloadThread> entry : tm.getFutures().entrySet())
+            for (Map.Entry<GameVO,DownloadThread> entry : tm.getFutures().entrySet())
             {
-                Game game = entry.getKey();
+                GameVO game = entry.getKey();
                 DownloadThread dt = entry.getValue();
 
                 if(dt.isDone() && (completed.get(game) == null))
                 {
                     completed.put(game, dt);
                     ProcMon.ExitCode exit = ProcMon.ExitCode.ERROR;
-                    try {
+                    try
+                    {
                         exit = dt.get();
-                    } catch (ExecutionException e) {
+                    }
+                    catch (ExecutionException e)
+                    {
                         e.printStackTrace();
                     }
                     if(exit == ProcMon.ExitCode.SUCCESS)
@@ -261,12 +257,12 @@ public class Download
 
 
 
-    public static void cleanUp(GameList gameList)
+    public void cleanUp(GameList gameList)
     {
         for(Game game : gameList.getSelectedList())
         {
-            File f = new File ("./" + game.getId() + "/");
-            File f2 = new File ("./" + game.update().getId() + "/");
+            File f = new File ("./" + game.getGameId() + "/");
+            File f2 = new File ("./" + game.getUpdateId() + "/");
 
             deleteDirectory(f);
             deleteDirectory(f2);

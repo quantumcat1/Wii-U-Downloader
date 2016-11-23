@@ -28,9 +28,9 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, String> //Thre
     private JTextArea statusLabel = null;
     private JTextArea originalStatusLabel = null;
     private List<String> textContents;
-    private Game game;
+    private GameVO game;
 
-    DownloadThread(Game game, JTextArea originalStatusLabel)
+    DownloadThread(GameVO game, JTextArea originalStatusLabel)
     {
         this.game = game;
         textContents = new ArrayList<String>();
@@ -82,7 +82,8 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, String> //Thre
                         {
                             publish(s.toString());
                         }
-                        else if(s.toString().contains("10%") || s.toString().contains("20%") || s.toString().contains("30%") || s.toString().contains("40%") || s.toString().contains("50%") || s.toString().contains("60%") || s.toString().contains("70%") || s.toString().contains("80%") || s.toString().contains("90%"))
+                        //else if(s.toString().contains("10%") || s.toString().contains("20%") || s.toString().contains("30%") || s.toString().contains("40%") || s.toString().contains("50%") || s.toString().contains("60%") || s.toString().contains("70%") || s.toString().contains("80%") || s.toString().contains("90%"))
+                        if(s.toString().contains("%"))
                         {
                             publish(s.toString());
                         }
@@ -153,9 +154,12 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, String> //Thre
             if(isCancelled() || Thread.interrupted() || Thread.currentThread().isInterrupted())
             {
                 procMon.destroy();
-                try {
+                try
+                {
                     if (is != null)is.close();
-                } catch (IOException e) {
+                }
+                catch (IOException e)
+                {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
@@ -170,9 +174,12 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, String> //Thre
     public void done()
     {
         //need to think of a better thing to do here
-        try {
+        try
+        {
             if(is != null)is.close();
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -186,16 +193,11 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, String> //Thre
 
     public void sendGame()
     {
-        JSONObject objGame = getJson(game);
-        JSONObject objUpdate = getJson(game.update());
+        JSONObject obj = getJson(game);
 
-        if(objGame != null)
+        if(obj != null)
         {
-            sendJson(objGame);
-        }
-        if(objUpdate != null)
-        {
-            sendJson(objUpdate);
+            sendJson(obj);
         }
     }
     public void sendJson(JSONObject json)
@@ -220,7 +222,7 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, String> //Thre
             e.printStackTrace();
         }
     }
-    private static JSONObject getJson(Game game)
+    private static JSONObject getJson(GameVO game)
     {
         File f = new File ("./" + game.getId() + "/");
         if(f.exists())
