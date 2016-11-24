@@ -5,7 +5,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -184,7 +186,8 @@ public class Download
                     @Override
                     public void run()
                     {
-                        statusLabel.append(final_thing);
+                        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+                        statusLabel.append("[" + timeStamp + "] " + final_thing);
                     }
                 });
             }
@@ -235,7 +238,8 @@ public class Download
                             @Override
                             public void run()
                             {
-                                statusLabel.append(game.getTitle() + " finished\n");
+                                String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+                                statusLabel.append("[" + timeStamp + "] " + game.getTitle() + " finished\n");
                             }
                         });
                     }
@@ -246,7 +250,8 @@ public class Download
                             @Override
                             public void run()
                             {
-                                statusLabel.append(game.getTitle() + " finished with errors (please check separate log window for exit code)\n");
+                                String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+                                statusLabel.append("[" + timeStamp + "] " + game.getTitle() + " finished with errors (please check separate log window for exit code)\n");
                             }
                         });
                     }

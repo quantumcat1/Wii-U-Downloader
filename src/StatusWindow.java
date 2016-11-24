@@ -15,8 +15,6 @@ public class StatusWindow extends JPanel //simplements Scrollable
     JScrollPane scrollPane;
     public void initialise()
     {
-        //scrollPane = new JScrollPane();
-        //add(scrollPane);
         progressPanels = new ArrayList<ProgressPanel>();
     }
 
@@ -27,9 +25,9 @@ public class StatusWindow extends JPanel //simplements Scrollable
 
     public ProgressPanel addNew(String name)
     {
+        if(name.trim().equals("")) return null;
         ProgressPanel pp = new ProgressPanel(name);
         progressPanels.add(pp);
-        //scrollPane.add(pp.getPanel());
         add(pp.getPanel());
         revalidate();
         repaint();

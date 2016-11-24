@@ -1,11 +1,19 @@
 
 import java.awt.Dimension;
 import java.awt.Window;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.lang.ProcessBuilder.Redirect;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -31,6 +39,7 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, FileProgress>
     private JTextArea originalStatusLabel = null;
     private GameVO game;
     private StatusWindow window;
+    private JFrame frame;
 
     DownloadThread(GameVO game, JTextArea originalStatusLabel)
     {
@@ -53,10 +62,16 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, FileProgress>
             File f = new File("./" + game.getTitle() + "_log.txt");
 
             Process process = null;
+            String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
             try
             {
                 f.createNewFile();
-                pb.redirectOutput(f);
+                PrintWriter bw = new PrintWriter(new BufferedWriter(new FileWriter(f, true)));
+                bw.println("° º ¤ ø . ¸ . ø ¤ º ° º ¤ ø . ¸ . ø ¤ ° º ¤ ø . ¸ . ø ¤ º ° º ¤ ø . ¸ ");
+                bw.println("Download started at " + timeStamp);
+                bw.println("° º ¤ ø . ¸ . ø ¤ º ° º ¤ ø . ¸ . ø ¤ ° º ¤ ø . ¸ . ø ¤ º ° º ¤ ø . ¸ ");
+                bw.close();
+                pb.redirectOutput(Redirect.appendTo(f));
                 process = pb.start();
                 is = new FileInputStream(f);
             }
@@ -66,7 +81,8 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, FileProgress>
                 cancel(true);
             }
             procMon = ProcMon.create(process);
-            originalStatusLabel.append(game.getTitle() + " starting\n");
+
+            originalStatusLabel.append("[" + timeStamp + "] " + game.getTitle() + " starting\n");
         }
         FileProgress fp = new FileProgress();
         while((!procMon.isComplete() && exit == ProcMon.ExitCode.RUNNING) || exit == ProcMon.ExitCode.NULL)
@@ -128,7 +144,7 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, FileProgress>
     {
         if(window == null)
         {
-            JFrame frame = new JFrame(game.getTitle() + " Status");
+            frame = new JFrame(game.getTitle() + " Status");
             //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setPreferredSize(new Dimension(400, 600));
 
@@ -204,7 +220,25 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, FileProgress>
         sendGame();
         //if (statusLabel != null)statusLabel.append("~~~~~~~Finished~~~~~~~ Exit code: " + procMon.getProcess().exitValue());//shouldn't be allowed to directly access the process - but how else to get the real exit code?
         //if(window.getParent().getParent() != null) window.getParent().getParent().setVisible(false);
-        if(window.getParent() != null) ((Window) window.getParent()).dispose();
+        File f = new File("./" + game.getTitle() + "_log.txt");
+        if(f.exists())
+        {
+            String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+            try
+            {
+                PrintWriter bw = new PrintWriter(new BufferedWriter(new FileWriter(f, true)));
+                bw.println("° º ¤ ø . ¸ . ø ¤ º ° º ¤ ø . ¸ . ø ¤ ° º ¤ ø . ¸ . ø ¤ º ° º ¤ ø . ¸ ");
+                bw.println("Download finished at " + timeStamp);
+                bw.println("° º ¤ ø . ¸ . ø ¤ º ° º ¤ ø . ¸ . ø ¤ ° º ¤ ø . ¸ . ø ¤ º ° º ¤ ø . ¸ ");
+                bw.close();
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        if(frame != null) frame.dispose();
     }
 
     public void sendGame()
