@@ -18,6 +18,7 @@ import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -39,6 +40,7 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, FileProgress>
     private JTextArea originalStatusLabel = null;
     private GameVO game;
     private StatusWindow window;
+    private JLabel label;
     private JFrame frame;
 
     DownloadThread(GameVO game, JTextArea originalStatusLabel)
@@ -217,9 +219,9 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, FileProgress>
         {
             procMon.destroy();
         }
-        sendGame();
+        /*sendGame();
         //if (statusLabel != null)statusLabel.append("~~~~~~~Finished~~~~~~~ Exit code: " + procMon.getProcess().exitValue());//shouldn't be allowed to directly access the process - but how else to get the real exit code?
-        //if(window.getParent().getParent() != null) window.getParent().getParent().setVisible(false);
+        //if(window.getParent().getParent() != null) window.getParent().getParent().setVisible(false);*/
         File f = new File("./" + game.getTitle() + "_log.txt");
         if(f.exists())
         {
@@ -241,7 +243,7 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, FileProgress>
         if(frame != null) frame.dispose();
     }
 
-    public void sendGame()
+    /*public void sendGame()
     {
         JSONObject obj = getJson(game);
 
@@ -300,7 +302,7 @@ public class DownloadThread extends SwingWorker<ProcMon.ExitCode, FileProgress>
             return obj;
         }
         return null;
-    }
+    }*/
 }
 
 

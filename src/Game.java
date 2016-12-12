@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 
 public class Game
 {
@@ -18,40 +19,40 @@ public class Game
         }
     }
 
-    public Game(String title, String id, int size)
+    public Game(String title, String id, ArrayList<FileVO> files)
     {
         title.replaceAll(" Update", "");
         if(id.contains("0005000E"))
         {
-            game = new GameVO(title, id.replaceAll("0005000E", "00050000"), size);
-            update = new GameVO(title + " Update", id, size);
+            game = new GameVO(title, id.replaceAll("0005000E", "00050000"), files);
+            update = new GameVO(title + " Update", id, files);
         }
         else
         {
-            game = new GameVO(title, id, size);
-            update = new GameVO(title + " Update", id.replaceAll("00050000", "0005000E"), size);
+            game = new GameVO(title, id, files);
+            update = new GameVO(title + " Update", id.replaceAll("00050000", "0005000E"), files);
         }
     }
 
-    public void setGameSize(int size)
+    public void setGameFiles(ArrayList<FileVO> files)
     {
-        game.setSize(size);
+        game.setFiles(files);
     }
 
-    public void setUpdateSize(int size)
+    public void setUpdateSize(ArrayList<FileVO> files)
     {
-        update.setSize(size);
+        update.setFiles(files);
     }
 
-    public void setSize(String id, int size)
+    public void setSize(String id, ArrayList<FileVO> files)
     {
         if(id.contains("0005000E"))
         {
-            update.setSize(size);
+            update.setFiles(files);
         }
         else
         {
-            game.setSize(size);
+            game.setFiles(files);
         }
     }
 

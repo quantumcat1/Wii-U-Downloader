@@ -1,32 +1,34 @@
+import java.util.ArrayList;
 
 public class GameVO
 {
     private String id;
-    private int size;
+    //private int size;
     private String sizeStr;
     private String title;
+    private ArrayList<FileVO> files;
 
 
     public GameVO()
     {
         id = "";
-        size = 0;
         sizeStr = "";
+        files = new ArrayList<FileVO>();
     }
 
-    public GameVO(String title, String id, int size)
+    public GameVO(String title, String id, ArrayList<FileVO> files)
     {
         this.title = title;
         this.id = id;
-        this.size = size;
-        this.sizeStr = convertSizeStr(size);
+        this.files = files;
+        this.sizeStr = convertSizeStr(getSize());
     }
 
     public GameVO(String title, String id)
     {
         this.title = title;
         this.id = id;
-        size = 0;
+        files = new ArrayList<FileVO>();
     }
 
     private String convertSizeStr(int size)
@@ -67,24 +69,36 @@ public class GameVO
     }
     public int getSize()
     {
+        int size = 0;
+        for(FileVO file : files)
+        {
+            size += file.getSize();
+        }
         return size;
     }
     public String getTitle()
     {
         return title;
     }
+
     public void setTitle(String title)
     {
         this.title = title;
     }
-    public void setSize(int size)
-    {
-        this.size = size;
-        sizeStr = convertSizeStr(size);
-    }
+
     public String getSizeStr()
     {
         return sizeStr;
+    }
+
+    public void setFiles(ArrayList<FileVO> files)
+    {
+        this.files = files;
+    }
+
+    public ArrayList<FileVO> getFiles()
+    {
+        return files;
     }
 
 }
